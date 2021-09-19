@@ -68,8 +68,10 @@ static void input_pop(void)
     need_sync = 1;
 }
 
-/* overwrite all c-style comments with spaces. since they can lines,
-   we maintain in_comment (outside the function for unwind() to use).
+/* overwrite all c-style comments with spaces. since they can span
+   lines, we maintain in_comment (outside the function, for unwind()
+   to use). if in c++ mode, strip those comments, too.
+
    as an easy optimization, we trim any trailing whitespace, too. */
 
 static char in_comment;
@@ -88,13 +90,16 @@ static void erase_comments(char *s)
                 s[1] = ' ';
                 in_comment = 0;
             }
-            
+
             *s = ' ';
         } else {
             if ((*s == '/') && (s[1] == '*')) {
                 *s = ' ';
                 s[1] = ' ';
                 in_comment = 1;
+            } else if (x_flag && (*s == '/') && (s[1] == '/')) {
+                *s = 0;
+                break;
             } else {
                 if ((*s == '"') || (*s == '\''))
                     delim = *s;
@@ -167,7 +172,7 @@ static char *concat_line(input_mode mode)
             }
         case -1:
             return VSTRING_BUF(buf);
-            
+
         default:
             vstring_putc(&buf, c);
         }
@@ -196,7 +201,7 @@ int input_tokenize(struct list *list, char *s)
    of tokens appended, or -1 if end of input. */
 
 int input_tokens(input_mode mode, struct list *list)
-{       
+{
     char *s;
 
     s = concat_line(mode);
@@ -229,7 +234,7 @@ void input_dir(char *path)
 
 /* attempt to find a file, open it, and push it on the input stack.
    this function will try a few different places, depending on search:
-   
+
    INPUT_SEARCH_NOWHERE:    no search is performed, path is tried as-is
    INPUT_SEARCH_LOCAL:      the directory of the current top-of-stack
                             is tried first, and if no file is found ...

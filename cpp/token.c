@@ -286,7 +286,19 @@ int token_separate(token_class first, token_class second)
 
     case TOKEN_DOT:
         if ((second == TOKEN_DOT) || (second == TOKEN_ELLIP)
-          || (second == TOKEN_NUMBER))
+          || (second == TOKEN_NUMBER) || (x_flag && (second == TOKEN_MUL)))
+            return 1;
+
+        break;
+
+    case TOKEN_COLON:
+        if (x_flag && ((second == TOKEN_COLON) || (second == TOKEN_SCOPE)))
+            return 1;
+
+        break;
+
+    case TOKEN_ARROW:
+        if (x_flag && (second == TOKEN_MUL))
             return 1;
 
         break;
@@ -397,15 +409,32 @@ struct token *token_scan(char *buf, char **endptr)
         }
         break;
 
+    case TOKEN_COLON:
+        /* rather than generalize the modifiers table to handle tokens
+           that only apply in C++ mode, we have one special case here. */
+
+        if (x_flag && (cp[1] == ':')) {
+            cp += 2;
+            class = TOKEN_SCOPE;
+        } else
+            ++cp;
+
+        break;
+
     case TOKEN_DOT:
         if ((cp[1] == '.') && (cp[2] == '.')) {
             cp += 3;
             class = TOKEN_ELLIP;
             break;
+        } else if (x_flag && (cp[1] == '*')) {
+            cp += 2;
+            class = TOKEN_DOTMUL;
+            break;
         } else if (!isdigit(*cp)) {
             ++cp;
             break;
         }
+        /* fallthru */
     case TOKEN_NUMBER:
         while (isalnum(*cp) || (*cp == '.') || (*cp == '_')) {
             if ((toupper(*cp) == 'E') && ((cp[1] == '-') || (cp[1] == '+')))
@@ -428,7 +457,12 @@ struct token *token_scan(char *buf, char **endptr)
             class = TOKEN_ARROW;
             cp += 2;
             break;
+        } else if (x_flag && (cp[1] == '>') && (cp[2] == '*')) {
+            class = TOKEN_ARROWMUL;
+            cp += 3;
+            break;
         }
+        /* fallthru */
     default:
         {
             int index;

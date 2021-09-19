@@ -30,6 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include "directive.h"
 #include "macro.h"
 
+char x_flag;            /* set if in C++ mode */
+
 static FILE *out_fp;
 static char *out_path;
 
@@ -68,7 +70,7 @@ void error(char *fmt, ...)
 void *safe_malloc(size_t bytes)
 {
     void *p;
-		
+
     p = malloc(bytes);
     if (p == 0) error("out of memory");
     return p;
@@ -106,7 +108,7 @@ restart:
         if (t == 0) {
             if (input_tokens(INPUT_MODE_THIS, list) == -1)
                 return no_args;
-            
+
             no_args = -1;
             goto restart;
         }
@@ -122,7 +124,7 @@ restart:
 
                 goto restart;
             }
-                
+
             if (t->class == TOKEN_LPAREN) ++parentheses;
             if (t->class == TOKEN_RPAREN) --parentheses;
             t = list_next(t);
@@ -180,7 +182,7 @@ static void output(struct list *list)
     t = list_first(list);
     list_remove(list, t);
 
-    if (t->class & TOKEN_NO_TEXT) 
+    if (t->class & TOKEN_NO_TEXT)
         error("CPP INTERNAL: attempt to output non-text token %x", t->class);
 
     if (last_class && token_separate(last_class, t->class))
@@ -197,7 +199,7 @@ static void output(struct list *list)
 /* synchronize the output file's idea of path/line_no with ours. usually
    this simply emits newlines, but when large (more than SYNC_WINDOW)
    line changes or the path changes, output a #line directive. the flag
-   need_sync is a dirty hack; input.c and directive.c set this when the 
+   need_sync is a dirty hack; input.c and directive.c set this when the
    path of the top-of-stack is changed, so we don't have to track it */
 
 char need_sync;
@@ -205,16 +207,16 @@ char need_sync;
 static void sync(void)
 {
     static int line_no = 1;
-    
+
     if (need_sync || (line_no > INPUT_STACK->line_no)
       || (line_no < (INPUT_STACK->line_no - SYNC_WINDOW))) {
         line_no = INPUT_STACK->line_no;
-        fprintf(out_fp, "\n# %d \"%s\"\n", line_no, 
+        fprintf(out_fp, "\n# %d \"%s\"\n", line_no,
           VSTRING_BUF(INPUT_STACK->path));
         need_sync = 0;
         last_class = 0;
     }
-    
+
     while (line_no < INPUT_STACK->line_no) {
         fputc('\n', out_fp);
         ++line_no;
@@ -244,7 +246,7 @@ static void loop(void)
 
         while (!list_empty(&list)) {
             directive(&list);
-    
+
             while (!list_empty(&list)) {
                 sync();
                 repl = replace(&list);
@@ -265,10 +267,15 @@ int main(int argc, char **argv)
 
     --argc;
     ++argv;
-    
+
     while (*argv && (**argv == '-')) {
         switch ((*argv)[1])
         {
+        case 'x':
+            (*argv) += 2;
+            if (**argv) goto usage;
+            x_flag = 1;
+            break;
         case 'I':
             (*argv) += 2;
             if (**argv == 0) goto usage;
@@ -278,7 +285,7 @@ int main(int argc, char **argv)
             (*argv) += 2;
             if (macro_cmdline(*argv) == 0) goto usage;
             break;
-            
+
         default:
             goto usage;
         }
@@ -306,6 +313,7 @@ usage:
         "usage: cpp {<option>} <input> <output>"                        "\n"
                                                                         "\n"
         "options:"                                                      "\n"
+        "   -x                      recognize C++ comments and tokens"  "\n"
         "   -I<dir>                 add <dir> to system include paths"  "\n"
         "   -D<name>[=<value>]      define macro (default value is 1)"  "\n"
     );

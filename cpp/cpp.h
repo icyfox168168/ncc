@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #define SYNC_WINDOW 20
 
 extern char need_sync;
+extern char x_flag;
 
 void *safe_malloc(size_t);
 void error(char *, ...);

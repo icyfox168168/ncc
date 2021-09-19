@@ -115,22 +115,25 @@ typedef int token_class;
 #define TOKEN_QUEST         ( 45 | TOKEN_STATIC )                     /* ? */
 #define TOKEN_TILDE         ( 46 | TOKEN_STATIC )                     /* ~ */
 #define TOKEN_COMMA         ( 47 | TOKEN_STATIC )                     /* , */
+#define TOKEN_SCOPE         ( 48 | TOKEN_STATIC )                     /* :: */
+#define TOKEN_DOTMUL        ( 49 | TOKEN_STATIC )                     /* .* */
+#define TOKEN_ARROWMUL      ( 50 | TOKEN_STATIC )                     /* ->* */
 
-#define TOKEN_SPACE         ( 48 )                    /* whitespace(s) */
-#define TOKEN_IDENT         ( 49 )                    /* identifier */
-#define TOKEN_INERT_IDENT   ( 50 )                    /* can't be expanded */
-#define TOKEN_NUMBER        ( 51 )                    /* preproc number */
-#define TOKEN_STRING        ( 52 )                    /* string literal */
-#define TOKEN_CHAR          ( 53 )                    /* character constant */
+#define TOKEN_SPACE         ( 51 )                    /* whitespace(s) */
+#define TOKEN_IDENT         ( 52 )                    /* identifier */
+#define TOKEN_INERT_IDENT   ( 53 )                    /* can't be expanded */
+#define TOKEN_NUMBER        ( 54 )                    /* preproc number */
+#define TOKEN_STRING        ( 55 )                    /* string literal */
+#define TOKEN_CHAR          ( 56 )                    /* character constant */
 
-#define TOKEN_STRINGIZE     ( 54 | TOKEN_STATIC | TOKEN_NOT_C )  /* # (op) */
-#define TOKEN_PASTE         ( 55 | TOKEN_STATIC | TOKEN_NOT_C )  /* ## (op) */
+#define TOKEN_STRINGIZE     ( 57 | TOKEN_STATIC | TOKEN_NOT_C )  /* # (op) */
+#define TOKEN_PASTE         ( 58 | TOKEN_STATIC | TOKEN_NOT_C )  /* ## (op) */
 
-#define TOKEN_INT           ( 56 | TOKEN_NO_TEXT )
-#define TOKEN_UINT          ( 57 | TOKEN_NO_TEXT )
-#define TOKEN_ARG           ( 58 | TOKEN_NO_TEXT )    /* formal argument */
+#define TOKEN_INT           ( 59 | TOKEN_NO_TEXT )
+#define TOKEN_UINT          ( 60 | TOKEN_NO_TEXT )
+#define TOKEN_ARG           ( 61 | TOKEN_NO_TEXT )    /* formal argument */
 
-#define TOKEN_OTHER         ( 59 | TOKEN_NOT_C )
+#define TOKEN_OTHER         ( 62 | TOKEN_NOT_C )
 
 /* because the union payload of token has a vstring, which
    requires initialization/finalization, the class should be
