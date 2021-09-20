@@ -7,11 +7,11 @@
 #
 ##############################################################################
 
-CC=gcc
+CC=gcc -std=c89
 CFLAGS=-g
 
-CXX=g++
-CXXFLAGS=-g
+CXX=g++ -std=c++98 -Wno-return-type
+CXXFLAGS=-g -DDEBUG
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -48,11 +48,22 @@ cpp/cpp: $(CPP_OBJS)
 
 ##############################################################################
 
-CC1_HDRS=	cc1/cc1.h
+CC1_HDRS=	cc1/arm.h cc1/c89.h cc1/cc1.h cc1/ctype.h cc1/lex.h \
+		cc1/list.h cc1/stack.h cc1/string.h cc1/symbol.h \
+		cc1/token.h cc1/type.h
 
-CC1_OBJS=	cc1/cc1.o
+CC1_OBJS=	cc1/cc1.o cc1/ctype.o cc1/lex.o cc1/string.o cc1/symbol.o \
+		cc1/token.o cc1/type.o cc1/c89-decl.o
 
 cc1/cc1.o:		cc1/cc1.cc $(CC1_HDRS)
+cc1/ctype.o:		cc1/ctype.cc $(CC1_HDRS)
+cc1/lex.o:		cc1/lex.cc $(CC1_HDRS)
+cc1/string.o:		cc1/string.cc $(CC1_HDRS)
+cc1/symbol.o:		cc1/symbol.cc $(CC1_HDRS)
+cc1/token.o:		cc1/token.cc $(CC1_HDRS)
+cc1/type.o:		cc1/type.cc $(CC1_HDRS)
+
+cc1/c89-decl.o:		cc1/c89-decl.cc $(CC1_HDRS)
 
 cc1/cc1: $(CC1_OBJS)
 	$(CXX) $(CXXFLAGS) -o cc1/cc1 $(CC1_OBJS)
