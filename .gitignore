@@ -1,2 +1,3 @@
 *.o
 cpp/cpp
+cc1/cc1
